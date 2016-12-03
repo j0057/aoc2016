@@ -5,14 +5,14 @@ import unittest
 def parse(f):
     for line in f:
         if not line: continue
-        yield tuple(sorted(int(item) for item in line.split()))
+        yield [ int(item) for item in line.split() ]
 
 def is_triangle(a, b, c):
     return a + b > c
 
 def count_triangles(triangles):
     result = 0
-    for (a, b, c) in triangles:
+    for (a, b, c) in map(sorted, triangles):
         if is_triangle(a, b, c):
             result += 1
     return result
