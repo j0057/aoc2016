@@ -81,7 +81,7 @@ def main():
         if len(sys.argv) >= 2:
             speed = int(sys.argv[1]) / 1000.0
         else:
-            speed = 0.5
+            speed = 0.06
         with open('input/day08.txt') as script:
             d = LEDDisplay()
             d.animate(script, speed=speed)
