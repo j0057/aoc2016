@@ -1,6 +1,5 @@
 import re
 import itertools
-import unittest
 
 def contains_abba(s):
     for i in range(len(s)-3):
@@ -33,34 +32,3 @@ def count_hypernet_tls(addresses):
 
 def count_hypernet_ssl(addresses):
     return sum(1 for a in addresses if is_hypernet_ssl(a))
-
-class Test07A_HypernetTLS(unittest.TestCase):
-    def test_07a_example(self):
-        result = count_hypernet_tls([
-            'abba[mnop]qrst',
-            'abcd[bddb]xyyx',
-            'aaaa[qwer]tyui',
-            'ioxxoj[asdfgh]zxcvbn'
-        ])
-        self.assertEqual(result, 2)
-
-    def test_07a_answer(self):
-        with open('input/day07.txt', 'r') as f:
-            result = count_hypernet_tls(line.strip() for line in f)
-        self.assertEqual(result, 115)
-
-class Test07B_HypernetSSL(unittest.TestCase):
-    def test_07b_example(self):
-        print
-        result = count_hypernet_ssl([
-            'aba[bab]xyz',
-            'xyx[xyx]xyx',
-            'aaa[kek]eke',
-            'zazbz[bzb]cdb'
-        ])
-        self.assertEqual(result, 3)
-
-    def test_07b_answer(self):
-        with open('input/day07.txt', 'r') as f:
-            result = count_hypernet_ssl(line.strip() for line in f)
-        self.assertEqual(result, 1)
