@@ -1,7 +1,5 @@
 #!/usr/bin/env python2.7
 
-import unittest
-
 _ = object()
 
 keypad = [[_, _, _, _, _],
@@ -55,25 +53,3 @@ def bunny_keypad(directions, keypad=keypad, y=2, x=2):
 
 def bunny_keypad_really(directions):
     return bunny_keypad(directions, keypad_b, y=3, x=1)
-
-class Test02A_BunnyKeyPad(unittest.TestCase):
-    def test_02a_example(self):
-        result = bunny_keypad('ULL\nRRDDD\nLURDL\nUUUUD\n')
-        self.assertEqual(result, '1985')
-
-    def test_02a_answer(self):
-        with open('input/day02.txt', 'r') as f:
-            puzzle = f.read()
-        result = bunny_keypad(puzzle)
-        self.assertEqual(result, '33444')
-
-class Test02B_BunnyKeyPad(unittest.TestCase):
-    def test_02b_example(self):
-        result = bunny_keypad_really('ULL\nRRDDD\nLURDL\nUUUUD\n')
-        self.assertEqual(result, '5DB3')
-
-    def test_02b_answer(self):
-        with open('input/day02.txt', 'r') as f:
-            puzzle = f.read()
-        result = bunny_keypad_really(puzzle)
-        self.assertEqual(result, '446A6')
