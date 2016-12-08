@@ -1,7 +1,6 @@
 import re
 import sys
 import time
-import unittest
 
 class LEDDisplay(object):
     def __init__(self, sy=6, sx=50):
@@ -77,61 +76,12 @@ class LEDDisplay(object):
             sys.stdout.write('\033[{0}A'.format(self.sy+4))
         sys.stdout.write('\033[{0}B'.format(self.sy+4))
 
-class Test_08_Display(unittest.TestCase):
-    def test_08_example1(self):
-        d = LEDDisplay(3, 7)
-        d.rect(y=2, x=3)
-        self.assertEqual(str(d).split(), ['###....','###....','.......'])
-        self.assertEqual(int(d), 6)
-
-    def test_08_example2(self):
-        d = LEDDisplay(3, 7)
-        d.rect(y=2, x=3)
-        d.rotx(x=1, n=1)
-        self.assertEqual(str(d).split(), ['#.#....','###....','.#.....'])
-        self.assertEqual(int(d), 6)
-
-    def test_08_example3(self):
-        d = LEDDisplay(3, 7)
-        d.rect(y=2, x=3)
-        d.rotx(x=1, n=1)
-        d.roty(y=0, n=4)
-        self.assertEqual(str(d).split(), ['....#.#','###....','.#.....'])
-        self.assertEqual(int(d), 6)
-
-    def test_08_example4(self):
-        d = LEDDisplay(3, 7)
-        d.rect(y=2, x=3)
-        d.rotx(x=1, n=1)
-        d.roty(y=0, n=4)
-        d.rotx(x=1, n=1)
-        self.assertEqual(str(d).split(), ['.#..#.#','#.#....','.#.....'])
-        self.assertEqual(int(d), 6)
-
-class Test_08A_DisplayScript(unittest.TestCase):
-    def test_08a_example_str(self):
-        script = ['rect 3x2', 'rotate column x=1 by 1', 'rotate row y=0 by 4', 'rotate column x=1 by 1']
-        d = LEDDisplay(3, 7)
-        d.execute(script)
-        self.assertEqual(str(d).split(), ['.#..#.#','#.#....','.#.....'])
-
-    def test_08a_example_int(self):
-        script = ['rect 3x2']
-        d = LEDDisplay(3, 7)
-        d.execute(script)
-        self.assertEqual(int(d), 6)
-
-    def test_08a_answer(self):
-        with open('input/day08.txt') as script:
-            d = LEDDisplay()
-            d.execute(script)
-        #elf.assertEqual(int(d), 124)
-        self.assertEqual(int(d), 128)
-
 def main():
     try:
-        if len(sys.argv) >= 1:
+        if len(sys.argv) >= 2:
             speed = int(sys.argv[1]) / 1000.0
+        else:
+            speed = 0.5
         with open('input/day08.txt') as script:
             d = LEDDisplay()
             d.animate(script, speed=speed)
