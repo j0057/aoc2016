@@ -1,6 +1,6 @@
 import pytest
 
-from day08_led_display import *
+from day08 import *
 
 d = pytest.fixture(lambda: LEDDisplay(3, 7))
 D = pytest.fixture(lambda: LEDDisplay())

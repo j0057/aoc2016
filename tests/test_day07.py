@@ -1,4 +1,4 @@
-from day07_hypernet_tls import *
+from day07 import *
 
 def test_07a_example():
     assert count_hypernet_tls([

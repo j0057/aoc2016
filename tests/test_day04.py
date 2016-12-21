@@ -1,4 +1,4 @@
-from day04_checksums import *
+from day04 import *
 
 def test_04a_example():
     rooms = [

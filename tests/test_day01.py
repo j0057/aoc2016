@@ -1,4 +1,4 @@
-from day01_bunnyhq import *
+from day01 import *
 
 def test_01a_example1():
     assert bunny_hq('R2, L3') == 5

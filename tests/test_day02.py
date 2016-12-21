@@ -1,4 +1,4 @@
-from day02_bunnykeypad import *
+from day02 import *
 
 def test_02a_example():
     assert bunny_keypad('ULL\nRRDDD\nLURDL\nUUUUD\n') == '1985'

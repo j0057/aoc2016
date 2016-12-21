@@ -1,4 +1,4 @@
-from day10_balance_bots import *
+from day10 import *
 
 def test_10a_example():
     instructions = [

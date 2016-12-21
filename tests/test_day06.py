@@ -1,4 +1,4 @@
-from day06_colwords import *
+from day06 import *
 
 example = [
     'eedadn',

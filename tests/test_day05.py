@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from day05_crackpass import *
+from day05 import *
 
 if5 = pytest.mark.skipif('5' not in os.environ.get('TEST', '').split(','), reason='TEST=5 not specified')
 

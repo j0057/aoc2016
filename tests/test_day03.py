@@ -1,4 +1,4 @@
-from day03_triangles import *
+from day03 import *
 
 def test_03a_example():
     triangles = parse('5 10 25\n'.split('\n'))

@@ -1,5 +1,5 @@
 
-from day09_explosives_in_cyberspace import *
+from day09 import *
 
 with open('input/day09.txt', 'r') as compressed:
     c = compressed.read().strip()
