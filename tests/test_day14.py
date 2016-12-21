@@ -1,6 +1,7 @@
 from day14 import *
 
 k = 'jlmsuwbz'
+M=memoize({})
 
 def test_14a_triplets_0(): assert nth(0, triplets('abc')) == (18, '8')
 def test_14a_triplets_1(): assert nth(1, triplets('abc')) == (39, 'e')
@@ -27,7 +28,7 @@ def test_14a_answer_63(): assert nth(63, keys(k))[0] == 35186
 
 def test_14b_key_stretch(): assert S('abc', 0) == 'a107ff634856bb300138cac6568c0f24'
 
-def test_14b_example_0():  assert nth(0,  keys('abc', F=memoize(S)))[0] == 10
-def test_14b_example_63(): assert nth(63, keys('abc', F=memoize(S)))[0] == 22551
+def test_14b_example_0():  assert nth(0,  keys('abc', F=M(S)))[0] == 10
+def test_14b_example_63(): assert nth(63, keys('abc', F=M(S)))[0] == 22551
 
-def test_14b_answer(): assert nth(63, keys(k, F=memoize(S)))[0] == 22429
+def test_14b_answer(): assert nth(63, keys(k, F=M(S)))[0] == 22429

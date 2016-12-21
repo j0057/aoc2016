@@ -1,14 +1,16 @@
 import hashlib
 from itertools import count, islice, takewhile
 
-class memoize(object):
-    def __init__(self, f):
-        self.f = f
-        self.c = {}
-    def __call__(self, *a):
-        if a not in self.c:
-            self.c[a] = self.f(*a)
-        return self.c[a]
+def memoize(d={}):
+    class memoize(object):
+        def __init__(self, f):
+            self.f = f
+            self.c = d
+        def __call__(self, *a):
+            if a not in self.c:
+                self.c[a] = self.f(*a)
+            return self.c[a]
+    return memoize
 
 H = lambda s, i: hashlib.md5(s + str(i)).hexdigest()
 S = lambda s, i: reduce(lambda a, b: hashlib.md5(a).hexdigest(), xrange(2016), H(s, i))
