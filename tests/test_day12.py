@@ -17,12 +17,12 @@ example = [
 def test_12a_parser():
     code = parse(example)
     assert code == [
-        (op_cpy_imm, '41', 'a'),
-        (op_inc, 'a'),
-        (op_inc, 'a'),
-        (op_dec, 'a'),
-        (op_jnz_reg, 'a', '2'),
-        (op_dec, 'a')
+        (op_cpy, ('41', 'a')),
+        (op_inc, ('a',)),
+        (op_inc, ('a',)),
+        (op_dec, ('a',)),
+        (op_jnz, ('a', '2')),
+        (op_dec, ('a',))
     ]
 
 def test_12a_example():
@@ -36,7 +36,7 @@ def test_12a_answer():
         code = parse(challenge)
         (ip, regs) = (0, {'a': 0, 'b': 0, 'c': 0, 'd': 0})
         (ip, regs) = run(ip, regs, code)
-        assert regs['a'] == 318009
+        assert regs['a'] == 318009 #*
 
 @if12
 def test_12b_answer():
@@ -44,4 +44,4 @@ def test_12b_answer():
         code = parse(challenge)
         (ip, regs) = (0, {'a': 0, 'b': 0, 'c': 1, 'd': 0})
         (ip, regs) = run(ip, regs, code)
-        assert regs['a'] == 9227663
+        assert regs['a'] == 9227663 #*
