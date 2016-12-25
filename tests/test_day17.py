@@ -1,5 +1,3 @@
-from pudb import set_trace
-
 from day17 import *
 
 def test_17a_find_moves_1(): assert list(find_moves('hijkl', (3, 0), ''))  == ['D']

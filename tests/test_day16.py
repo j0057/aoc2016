@@ -1,4 +1,3 @@
-from pudb import set_trace
 from day16 import *
 
 def test_16a_dragon_curve_1(): assert dragon_curve(P('1'), 2) == P('100')
