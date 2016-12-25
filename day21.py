@@ -1,4 +1,5 @@
 
+import itertools
 import re
 
 wrap = lambda c: lambda f: lambda *a, **k: c(f(*a, **k))
@@ -18,7 +19,13 @@ def op_rotate_pos(s, d, x):
 
 def op_rotate_chr(s, x):
     x = s.index(x)
-    return op_rotate_pos(s, 'right', (1 + x + (x >= 4)) % len(s))
+    x = (1 + x + (x >= 4)) % len(s)
+    return op_rotate_pos(s, 'right', x)
+
+def op_rotate_chr_inv(s, x):
+    x = s.index(x)
+    x = 1 + x
+    return op_rotate_pos(s, 'left', x)
 
 def op_reverse(s, x, y):
     return s[:x] + s[x:y+1][::-1] + s[y+1:]
@@ -49,13 +56,17 @@ def parse(program):
         else:
             raise SyntaxError('Error parsing {!r}'.format(instruction))
 
-def run(code, s):
-    print '>', s
+def _run(code, s):
     for (op, args) in code:
         s = list(s)
         s = op(s, *args)
-        print '{:15} {:15} {}'.format(op.__name__, args, s)
         s = ''.join(s)
+        yield (s, op, args)
+
+def run(code, s):
+    print '>', s
+    for (s, op, args) in _run(code, s):
+        print '{:18} {:15} {}'.format(op.__name__, args, ' '.join(s))
         yield s
     print '.'
 
@@ -67,5 +78,14 @@ def flip(code):
             yield (op, (RL[1 - RL.index(args[0])], args[1]))
         elif op is op_move:
             yield (op, (args[1], args[0]))
+        elif op is op_rotate_chr:
+            yield (op_rotate_chr_inv, args)
         else:
             yield (op, args)
+
+def brute(code, x):
+    code = list(code)
+    for guess in itertools.imap(''.join, itertools.permutations(x)):
+        y, _, _ = last(_run(code, guess))
+        if x == y:
+            return guess

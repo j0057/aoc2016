@@ -30,17 +30,37 @@ def test_21a_answer():
     with open('input/day21.txt', 'r') as program:
         code = parse(program)
         gen = run(code, 'abcdefgh')
-        assert last(gen) == 'dgfaehcb'
+        assert last(gen) == 'dgfaehcb' #*
 
-def test_21b_ex():
+def _test_21b_ex():
     code = list(parse(example))
     gen1 = run(code, 'abcde')
     gen2 = run(flip(code), 'decab')
     assert last(gen1) == 'decab'
     assert last(gen2) == 'abcde'
 
-def test_21b_answer():
+def _test_21b_answer():
     with open('input/day21.txt', 'r') as program:
         code = parse(program)
         gen = run(flip(code), 'fbgdceah')
-        assert last(gen) == 'hbefcadg'
+        result = last(gen)
+        assert result == 'fdhgacbe'
+        assert result != 'hbefcadg'
+
+def test_21b_answer_by_force():
+    with open('input/day21.txt', 'r') as program:
+        code = parse(program)
+        assert brute(code, 'fbgdceah') == 'fdhgacbe' #*
+
+def test_21b_bug():
+    c = 'fdhgacbe'
+    with open('input/day21.txt', 'r') as program:
+        code = list(parse(program))
+        for i in range(1, len(code)):
+            p1 = brute(code[:i], c)
+            p2 = last(run(flip(code[:i]), c))
+            print i, p1, p2
+            assert p1 == p2
+
+def test_21b_rotate_pos_right():
+    assert op_rotate_pos('fdhgacbe', 'right', 2) == 'befdhgac'
