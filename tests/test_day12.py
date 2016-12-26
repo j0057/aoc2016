@@ -21,21 +21,15 @@ def test_12a_parser():
     ]
 
 def test_12a_example():
-    code = parse(example)
-    (ip, regs) = (0, dict(a=0, b=0, c=0, d=0))
-    (ip, regs) = run(ip, regs, code)
+    (ip, regs) = run(0, REG(), parse(example))
     assert regs['a'] == 42    
 
 def test_12a_answer():
-    with open('input/day12.txt', 'r') as challenge:
-        code = parse(challenge)
-        (ip, regs) = (0, dict(a=0, b=0, c=0, d=0))
-        (ip, regs) = run(ip, regs, code)
+    with open('input/day12.txt', 'r') as f:
+        (ip, regs) = run(0, REG(), parse(f))
         assert regs['a'] == 318009 #*
 
 def test_12b_answer():
-    with open('input/day12.txt', 'r') as challenge:
-        code = parse(challenge)
-        (ip, regs) = (0, dict(a=0, b=0, c=1, d=0))
-        (ip, regs) = run(ip, regs, code)
+    with open('input/day12.txt', 'r') as f:
+        (ip, regs) = run(0, REG(c=1), parse(f))
         assert regs['a'] == 9227663 #*

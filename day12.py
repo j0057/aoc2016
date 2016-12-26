@@ -7,11 +7,20 @@ ilen = lambda g: reduce(lambda n, _: n+1, g, 0)
 
 is_num = lambda s: s.isdigit() or (s[0] == '-' and s[1:].isdigit())
 
+def REG(a=0, b=0, c=0, d=0, **k):
+    result = {'a': a, 'b': b, 'c': c, 'd': d }
+    result.update(k)
+    return result
+
 @wrap(list)
 def parse(program):
     parser = dict((name.replace('op_', ''), func) for (name, func) in globals().items() if name.startswith('op_'))
     for instruction in program:
         try:
+            if ';' in instruction:
+                instruction = instruction.split(';')[0].strip()
+            if not instruction:
+                continue
             a = instruction.strip().split()
             yield (parser[a[0]], tuple(a[1:]))
         except KeyError as e:
@@ -20,12 +29,13 @@ def parse(program):
 def fmt_op(op, args):
     return op.__name__[3:] + ' ' + ' '.join(args)
 
-def _run(ip, regs, code):
+def _run(ip, regs, code, tmax=1000000000, maxout=8):
     _code = optimize(code)
-    prof = [0] * len(code)
+    t, prof = 0, [0] * len(code)
     try:
-        while ip < len(code):
+        while ip < len(code) and t < tmax and ('out' not in regs or len(regs['out']) < maxout):
             prof[ip] += 1
+            t += 1
             (op, args) = _code[ip]
             if op is op_tgl:
                 (ip, regs) = op(ip, regs, code, *args)
@@ -34,8 +44,9 @@ def _run(ip, regs, code):
                 (ip, regs) = op(ip, regs, *args)
             yield (ip, regs)
     finally:
-        print 'profile ({} instructions total)\n'.format(sum(prof)) \
-            + '\n'.join('{:10}   {:20} {:20}'.format(p, fmt_op(*s), fmt_op(*f)) for p,s,f in zip(prof, code, _code))
+        print 'profile ({} instructions total, ip={})\n'.format(sum(prof), ip) \
+            + '\n'.join('{:10} {:2} {:20} {:20}'.format(p, ip, fmt_op(*s), fmt_op(*f)) for (ip,(p,s,f)) in enumerate(zip(prof, code, _code)))
+        pass
 
 def run(ip, regs, code):
     return last(_run(ip, regs, code))
@@ -47,8 +58,10 @@ def run_verbose(ip, regs, code):
     return (ip, regs)
 
 def optimize(code):
+
     def optimizer(slow, fast):
-        slow, fast = parse(slow.split(' | ')), parse(fast.split(' | '))
+        slow = parse(slow.split(' | '))
+        fast = parse(fast.split(' | '))
         @wrap(list)
         def optimize(code):
             i = 0
@@ -73,12 +86,15 @@ def optimize(code):
                 yield code[i]
                 i += 1
         return optimize
+
     return reduce(lambda _code, func: func(_code), [
-        optimizer('cpy Q R | inc P | dec R | jnz R -2 | dec S | jnz S -5',
-                  'mul Q S | nop   | nop   | nop      | nop   | nop     '),
-        optimizer('inc P   | dec Q | jnz Q -2',
-                  'add Q P | nop   | nop     ')
-    ], code) if int(os.environ.get('OPTIMIZE', '1')) else code
+        optimizer('jnz 0 0', 'nop'),
+        optimizer('cpy q r   | inc p | dec r | jnz r -2 | dec s | jnz s -5',
+                  'mul q s p | nop   | nop   | nop      | nop   | nop     '),
+        optimizer('inc p   | dec q | jnz q -2',
+                  'add q p | nop   | nop     ')
+    ], code) \
+    if int(os.environ.get('OPTIMIZE', '1')) else code
 
 def res(reg, x):
     return int(x) if is_num(x) else reg[x]
@@ -122,12 +138,19 @@ def op_tgl(ip, reg, code, a):
 def op_nop(ip, reg):
     return (ip + 1, reg)
 
-def op_mul(ip, reg, a, b):
-    reg.update({ 'a': reg['a'] + res(reg, a) * res(reg, b), 'c': 0, 'd': 0 })
+def op_mul(ip, reg, q, s, p):
+    r = last(x for x in 'abcd' if x != p and x != s)
+    reg[p] += res(reg, q) * res(reg, s)
+    reg[r] = 0
+    reg[s] = 0
     return (ip + 1, reg)
 
 def op_add(ip, reg, a, b):
     reg[b] = reg[b] + res(reg, a)
     if a in reg:
         reg[a] = 0
+    return (ip + 1, reg)
+
+def op_out(ip, reg, a):
+    reg['out'].append(res(reg, a))
     return (ip + 1, reg)

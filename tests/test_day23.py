@@ -13,30 +13,27 @@ example = [
 ]
 
 def test_23a_ex():
-    code = parse(example)
-    (ip, regs) = (0, dict(a=0, b=0, c=0, d=0))
-    (ip, regs) = run(ip, regs, code)
+    (ip, regs) = run(0, REG(), parse(example))
     assert regs['a'] == 3
 
 def test_23a_answer():
     with open('input/day23.txt', 'r') as f:
-        code = parse(f)
-    (ip, regs) = (0, dict(a=7, b=0, c=0, d=0))
-    (ip, regs) = run_verbose(ip, regs, code)
-    assert regs['a'] == factorial(7) + 85*76 == 11500
+        (ip, regs) = run_verbose(0, REG(a=7), parse(f))
+        assert regs['a'] == factorial(7) + 85*76 == 11500
 
 def test_23b_answer():
     with open('input/day23.txt', 'r') as f:
-        code = parse(f)
-    (ip, regs) = (0, dict(a=12, b=0, c=0, d=0))
-    (ip, regs) = run_verbose(ip, regs, code)
-    assert regs['a'] == factorial(12) + 85*76 == 479008060
+        (ip, regs) = run_verbose(0, REG(a=12), parse(f))
+        assert regs['a'] == factorial(12) + 85*76 == 479008060
 
 def test_23b_optimize():
-    code0 = parse('cpy 6 c\ncpy 7 d\ninc a\ndec d\njnz d -2\ndec c\njnz c -5'.split('\n'))
-    code1 = parse('cpy 6 c\nmul 7 c\nnop\nnop\nnop\nnop\nnop'.split('\n'))
+    code0 = parse('cpy 6 c\ncpy 7 d  \ninc a\ndec d\njnz d -2\ndec c\njnz c -5'.split('\n'))
+    code1 = parse('cpy 6 c\nmul 7 c a\nnop\nnop\nnop\nnop\nnop'.split('\n'))
     code2 = optimize(code0)
     for c in [code0, code1, code2]:
-        (ip, reg) = run(0, dict(a=27, b=0, c=0, d=0), c)
+        (ip, reg) = run(0, REG(a=27, b=42), c)
         assert reg['a'] == 6*7+27
+        assert reg['b'] == 42
+        assert reg['c'] == 0
+        assert reg['d'] == 0
     assert code2 == code1
