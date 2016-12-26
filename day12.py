@@ -1,4 +1,5 @@
 import re
+import os
 
 wrap = lambda c: lambda f: lambda *a, **k: c(f(*a, **k))
 last = lambda g: reduce(lambda _, x: x, g)
@@ -21,16 +22,20 @@ def fmt_op(op, args):
 
 def _run(ip, regs, code):
     _code = optimize(code)
-    assert len(code) == len(_code)
-    while ip < len(code):
-        (op, args) = _code[ip]
-        if op is op_tgl:
-            (ip, regs) = op(ip, regs, code, *args)
-            _code = optimize(code)
-            assert len(code) == len(_code)
-        else:
-            (ip, regs) = op(ip, regs, *args)
-        yield (ip, regs)
+    prof = [0] * len(code)
+    try:
+        while ip < len(code):
+            prof[ip] += 1
+            (op, args) = _code[ip]
+            if op is op_tgl:
+                (ip, regs) = op(ip, regs, code, *args)
+                _code = optimize(code)
+            else:
+                (ip, regs) = op(ip, regs, *args)
+            yield (ip, regs)
+    finally:
+        print 'profile ({} instructions total)\n'.format(sum(prof)) \
+            + '\n'.join('{:10}   {:20} {:20}'.format(p, fmt_op(*s), fmt_op(*f)) for p,s,f in zip(prof, code, _code))
 
 def run(ip, regs, code):
     return last(_run(ip, regs, code))
@@ -43,34 +48,37 @@ def run_verbose(ip, regs, code):
 
 def optimize(code):
     def optimizer(slow, fast):
-        slow, fast = parse(slow.split('\n')), parse(fast.split('\n'))
+        slow, fast = parse(slow.split(' | ')), parse(fast.split(' | '))
         @wrap(list)
         def optimize(code):
             i = 0
-            while i < (len(code) - len(slow) + 1):
-                b={}
-                for (j, (op, args)) in enumerate(slow):
-                    c_op, c_args = code[i+j]
-                    if c_op != op:
-                        break
-                    if any((is_num(t) and (c != t)) or not is_num(c) and (c != b.get(t, c)) for (t, c) in zip(args, c_args)):
-                        break
-                    b.update((t, c) for (t, c) in zip(args, c_args) if not is_num(t))
-                if j+1 == len(slow):
-                    for (op, args) in fast:
-                        yield (op, tuple(t if is_num(t) else b[t] for t in args))
-                    i += len(slow)
-                else:
-                    yield code[i]
-                    i += 1
             while i < len(code):
+                b, f = {}, False
+                for (j, (slow_op, slow_args)) in enumerate(slow):
+                    if not (0 <= i+j < len(code)):
+                        break
+                    code_op, code_args = code[i+j]
+                    if code_op != slow_op:
+                        break
+                    if any(is_num(t) and (c != t) for (t, c) in zip(slow_args, code_args)):
+                        break
+                    if any((not is_num(c)) and (c != b.get(t, c)) for (t, c) in zip(slow_args, code_args)):
+                        break
+                    b.update({ t: c for (t, c) in zip(slow_args, code_args) if not is_num(t) })
+                else:
+                    for (fast_op, fast_args) in fast:
+                        yield (fast_op, tuple(t if is_num(t) else b[t] for t in fast_args))
+                    i += len(slow)
+                    continue
                 yield code[i]
                 i += 1
         return optimize
     return reduce(lambda _code, func: func(_code), [
-        optimizer('cpy q r\ninc p\ndec r\njnz r -2\ndec s\njnz s -5',
-                  'mul q s\nnop  \nnop  \nnop     \nnop  \nnop     '),
-    ], code)
+        optimizer('cpy Q R | inc P | dec R | jnz R -2 | dec S | jnz S -5',
+                  'mul Q S | nop   | nop   | nop      | nop   | nop     '),
+        optimizer('inc P   | dec Q | jnz Q -2',
+                  'add Q P | nop   | nop     ')
+    ], code) if int(os.environ.get('OPTIMIZE', '1')) else code
 
 def res(reg, x):
     return int(x) if is_num(x) else reg[x]
@@ -116,4 +124,10 @@ def op_nop(ip, reg):
 
 def op_mul(ip, reg, a, b):
     reg.update({ 'a': reg['a'] + res(reg, a) * res(reg, b), 'c': 0, 'd': 0 })
+    return (ip + 1, reg)
+
+def op_add(ip, reg, a, b):
+    reg[b] = reg[b] + res(reg, a)
+    if a in reg:
+        reg[a] = 0
     return (ip + 1, reg)

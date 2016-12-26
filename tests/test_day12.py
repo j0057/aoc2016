@@ -1,9 +1,4 @@
-import os
-import pytest
-
 from day12 import *
-
-if12 = pytest.mark.skipif('12' not in os.environ.get('TEST', '').split(','), reason='TEST=12 not specified')
 
 example = [
     'cpy 41 a',
@@ -27,21 +22,20 @@ def test_12a_parser():
 
 def test_12a_example():
     code = parse(example)
-    (ip, regs) = (0, {'a': 0, 'b': 0, 'c': 0, 'd': 0})
+    (ip, regs) = (0, dict(a=0, b=0, c=0, d=0))
     (ip, regs) = run(ip, regs, code)
     assert regs['a'] == 42    
 
 def test_12a_answer():
     with open('input/day12.txt', 'r') as challenge:
         code = parse(challenge)
-        (ip, regs) = (0, {'a': 0, 'b': 0, 'c': 0, 'd': 0})
+        (ip, regs) = (0, dict(a=0, b=0, c=0, d=0))
         (ip, regs) = run(ip, regs, code)
         assert regs['a'] == 318009 #*
 
-@if12
 def test_12b_answer():
     with open('input/day12.txt', 'r') as challenge:
         code = parse(challenge)
-        (ip, regs) = (0, {'a': 0, 'b': 0, 'c': 1, 'd': 0})
+        (ip, regs) = (0, dict(a=0, b=0, c=1, d=0))
         (ip, regs) = run(ip, regs, code)
         assert regs['a'] == 9227663 #*
