@@ -11,9 +11,6 @@ def parse(text):
                 points[int(ch)] = (y, x)
     return maze, list(p for p in points if p)
 
-def clone(maze):
-    return [ row[:] for row in maze ]
-
 def find_next(maze, (y1, x1)):
     for (dy, dx) in [(-1, 0), (+1, 0), (0, -1), (0, +1)]:
         y2 = y1 + dy
@@ -26,6 +23,7 @@ def find_next(maze, (y1, x1)):
             continue
         yield (y2, x2)
 
+# adapted from day13
 def find_path(maze, start, end, avoid):
     route = {start: []}
     queue = [start]
@@ -43,6 +41,7 @@ def find_path(maze, start, end, avoid):
 
 def find_routes(maze, points):
     avoid = lambda b: [ p for p in points if p != b ]
+    clone = lambda m: [ r[:] for r in m ]
     routes = { (a, b): find_path(clone(maze), a, b, avoid(b))
                for (a, b) in itertools.combinations(points, 2) }
     routes = { (a, b): p for ((a, b), p) in routes.items() if p }
@@ -51,31 +50,32 @@ def find_routes(maze, points):
              for (a, group) in itertools.groupby(sorted(routes.items()), lambda ((a, b), p): a) }
 
 def find_route(start, routes, closed=False):
-    #import pudb; pudb.set_trace()
+    closed = (lambda p: p[0] == p[-1]) if closed else (lambda p: True)
     Q = queue.PriorityQueue();
-    Q.put((0, len(routes), [start], []))
+    Q.put((len(routes), 0, [start]))
     best = 10**100
     result = None
     while not Q.empty():
-        path_len, unvisited, path, coords = Q.get()
-        #print path, len(coords)
-        if (unvisited == 0) and (len(coords) < best) and ((not closed) or (path[0] == path[-1])):
-            best = len(coords)
-            result = path, coords
-            print 'best:', result[0], len(result[0]), len(result[1])
+        unvisited, cost, path = Q.get()
+        if cost > best:
             continue
-        if best <= len(coords):
+        if (unvisited == 0) and closed(path):
+            if cost < best:
+                best = cost
+                result = path
+                print 'best:', result, len(result), best
             continue
         a = path[-1]
-        for (b, coords2) in routes[a].items():
-            if len(coords) + len(coords2) >= best:
+        for (b, coords) in routes[a].items():
+            new_cost = cost + len(coords)
+            if new_cost >= best:
                 continue
-            Q.put((len(coords), len(routes)-len(set(path+[b])), path+[b], coords+coords2))
-    return result
+            Q.put((len(routes)-len(set(path+[b])), new_cost, path+[b]))
+    return result, reduce(lambda a,b: a+b, [routes[a][b] for a,b in zip(result, result[1:])], [])
 
 if __name__ == '__main__':
     import tests.test_day24
     print '#A'
-    #tests.test_day24.test_24a_answer()
+    tests.test_day24.test_24a_answer()
     print '#B'
     tests.test_day24.test_24b_answer()
